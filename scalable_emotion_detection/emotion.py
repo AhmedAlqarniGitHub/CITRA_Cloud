@@ -7,13 +7,13 @@ from pymongo import MongoClient
 import io
 
 # MongoDB setup
-mongo_client = MongoClient("mongodb+srv://engahmed:I0MH2jrfaDBQlZM1@finvis.sur9jkb.mongodb.net/?retryWrites=true&w=majority")
+mongo_client = MongoClient("mongodb+srv://serviceaccount:serviceaccount@currency.lcwbwcw.mongodb.net/?retryWrites=true&w=majority")
 db = mongo_client.CITRA
 emotions_collection = db.emotions
 
 # Emotion detection setup
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Sad", 5: "Surprised", 6: "Neutral"}
-emotion_model_path = '/app/best_model.h5'
+emotion_model_path = 'best_model.h5'
 emotion_classifier = load_model(emotion_model_path, compile=False)
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
@@ -36,9 +36,16 @@ def process_image(image_data):
         emotion_label_arg = np.argmax(emotion_prediction)
         emotion_text = emotion_dict[emotion_label_arg]
 
+        # Frame the MongoDB document
+        mongo_document = {
+            "emotion": emotion_text,
+            "image": base64.b64encode(image_data).decode('utf-8'),
+            "date": "2021-01-01",
+            "venu": "Expo2030"
+        }
         # Save to MongoDB
-        emotions_collection.insert_one({"emotion": emotion_text})
-
+        # emotions_collection.insert_one({"emotion": emotion_text})
+        emotions_collection.insert_many([mongo_document])
         print(f'Processed image with detected emotion: {emotion_text}')
     except Exception as e:
         print(f'Error processing image: {e}')
