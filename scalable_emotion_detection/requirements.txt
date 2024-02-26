@@ -1,0 +1,6 @@
+Flask
+numpy
+opencv-python-headless
+tensorflow
+google-cloud-storage
+pymongo
