@@ -25,7 +25,7 @@ def preprocess_face(face_image):
     face_image = np.expand_dims(face_image, -1)
     return face_image
 
-def process_image(image_data):
+def process_image(image_data, timestamp, venue, camera_id):
     try:
         data = np.frombuffer(image_data, dtype=np.uint8)
         face_image = cv2.imdecode(data, cv2.IMREAD_COLOR)
@@ -36,16 +36,13 @@ def process_image(image_data):
         emotion_label_arg = np.argmax(emotion_prediction)
         emotion_text = emotion_dict[emotion_label_arg]
 
-        # Frame the MongoDB document
-        mongo_document = {
-            "emotion": emotion_text,
-            "image": base64.b64encode(image_data).decode('utf-8'),
-            "date": "2021-01-01",
-            "venu": "Expo2030"
-        }
         # Save to MongoDB
-        # emotions_collection.insert_one({"emotion": emotion_text})
-        emotions_collection.insert_many([mongo_document])
+        emotions_collection.insert_one({
+            "timestamp": timestamp,
+            "venue": venue,
+            "camera_id": camera_id,
+            "emotion": emotion_text
+        })
         print(f'Processed image with detected emotion: {emotion_text}')
     except Exception as e:
         print(f'Error processing image: {e}')
@@ -59,9 +56,16 @@ def entry_point(request):
     if not image_file:
         return 'No image file found in the request', 400
 
+    timestamp = request.form.get('timestamp')
+    venue = request.form.get('venue')
+    camera_id = request.form.get('camera_id')
+    if not (timestamp and venue and camera_id):
+        return 'Missing timestamp, venue, or camera_id in the request', 400
+
     image_data = image_file.read()
-    process_image(image_data)
+    process_image(image_data, timestamp, venue, camera_id)
     return ('', 204)
+
 
 if __name__ == "__main__":
     from flask import Flask, request

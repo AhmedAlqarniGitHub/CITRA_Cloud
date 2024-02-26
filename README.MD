@@ -31,6 +31,11 @@ Cloud Functionality:
 
 
 ===== Work Log:
-- Create a single container that can do Cloud Functionality completely (In-Progress)
-- Create Container AutoScale in Google Cloud (Not-Started)
+- Create a single program that can do Cloud Functionality completely (COMPLETED)
+- Create a single Container that can do Cloud Functionality and Write to MongoDB (COMPLETED)
+- Create Container AutoScale in Google Cloud (In-Progress)
 - Map Load Balancer to Created AutoScale instances (Not-Started)
+
+===== Code Run:
+docker build -t emotion-detection-app .  
+docker run -p 8088:8080 emotion-detection-app
