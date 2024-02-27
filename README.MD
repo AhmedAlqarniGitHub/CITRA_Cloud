@@ -37,5 +37,10 @@ Cloud Functionality:
 - Map Load Balancer to Created AutoScale instances (Not-Started)
 
 ===== Code Run:
-docker build -t emotion-detection-app .  
+docker build -t emotion-detection-app .  --platform linux/amd64
 docker run -p 8088:8080 emotion-detection-app
+
+docker tag emotion-detection-app me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:feb272
+docker push me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:feb272
+
+--platform linux/amd64

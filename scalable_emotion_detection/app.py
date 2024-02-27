@@ -1,10 +1,8 @@
-import base64
-import json
 import cv2
 import numpy as np
 from keras.models import load_model
 from pymongo import MongoClient
-import io
+import os
 
 # MongoDB setup
 mongo_client = MongoClient("mongodb+srv://serviceaccount:serviceaccount@currency.lcwbwcw.mongodb.net/?retryWrites=true&w=majority")
@@ -13,7 +11,7 @@ emotions_collection = db.emotions
 
 # Emotion detection setup
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Sad", 5: "Surprised", 6: "Neutral"}
-emotion_model_path = 'best_model.h5'
+emotion_model_path = '/app/best_model.h5'
 emotion_classifier = load_model(emotion_model_path, compile=False)
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
@@ -70,9 +68,10 @@ def entry_point(request):
 if __name__ == "__main__":
     from flask import Flask, request
     app = Flask(__name__)
-
+    print("Server running on port", os.environ["PORT"])
     @app.route('/', methods=['POST'])
     def index():
         return entry_point(request)
 
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port= os.environ["PORT"], debug=True)
+    print("Server running on port", os.environ["PORT"])

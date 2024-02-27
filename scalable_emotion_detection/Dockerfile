@@ -11,10 +11,13 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 8070 available to the world outside this container
-EXPOSE 8070
+EXPOSE 8088
 
 # Define environment variable
 ENV MODEL_PATH /app/best_model.h5
+
+# Define Port variable
+ENV PORT 8088
 
 # Run app.py when the container launches
 CMD ["python", "app.py"]
