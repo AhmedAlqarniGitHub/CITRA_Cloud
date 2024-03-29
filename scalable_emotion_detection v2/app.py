@@ -5,9 +5,9 @@ from pymongo import MongoClient
 import os
 
 # MongoDB setup
-mongo_client = MongoClient("mongodb+srv://serviceaccount:serviceaccount@currency.lcwbwcw.mongodb.net/?retryWrites=true&w=majority")
-db = mongo_client.CITRA
-emotions_collection = db.emotions
+mongo_client = MongoClient("mongodb+srv://ahmedalg4321:citra321@cluster0.u2aiu58.mongodb.net/?retryWrites=true&w=majority")
+db = mongo_client.citra
+emotions_collection = db.events
 
 # Emotion detection setup
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Sad", 5: "Surprised", 6: "Neutral"}
