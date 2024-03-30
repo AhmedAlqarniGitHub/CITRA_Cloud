@@ -3,6 +3,7 @@ import numpy as np
 from keras.models import load_model
 from pymongo import MongoClient
 import os
+from bson import ObjectId
 
 # MongoDB setup
 mongo_client = MongoClient("mongodb+srv://ahmedalg4321:citra321@cluster0.u2aiu58.mongodb.net/?retryWrites=true&w=majority")
@@ -11,7 +12,8 @@ emotions_collection = db.events
 
 # Emotion detection setup
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Sad", 5: "Surprised", 6: "Neutral"}
-emotion_model_path = '/app/best_model.h5'
+#emotion_model_path = '/app/best_model.h5'
+emotion_model_path = './best_model.h5'
 emotion_classifier = load_model(emotion_model_path, compile=False)
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
@@ -23,7 +25,7 @@ def preprocess_face(face_image):
     face_image = np.expand_dims(face_image, -1)
     return face_image
 
-def process_image(image_data, timestamp, venue, camera_id):
+def process_image(image_data, detectionTime, eventId, cameraId):
     try:
         data = np.frombuffer(image_data, dtype=np.uint8)
         face_image = cv2.imdecode(data, cv2.IMREAD_COLOR)
@@ -35,12 +37,26 @@ def process_image(image_data, timestamp, venue, camera_id):
         emotion_text = emotion_dict[emotion_label_arg]
 
         # Save to MongoDB
-        emotions_collection.insert_one({
-            "timestamp": timestamp,
-            "venue": venue,
-            "camera_id": camera_id,
-            "emotion": emotion_text
-        })
+        # Emotion data to be added
+        emotion_data = {
+            "cameraId": cameraId,
+            "detectionTime": detectionTime,
+            "detectedEmotion": emotion_text
+        }
+        event_id = ObjectId(eventId)
+        # Push the new emotion data into the 'emotions' array of the event with the matching eventId
+        result = emotions_collection.update_one(
+            {"_id": event_id},  # Match the event document by eventId
+            {"$push": {"emotions": emotion_data}}  # Push the new emotion object into the emotions array
+        )
+
+        if result.matched_count > 0:
+            if result.modified_count > 0:
+                print(f'Successfully updated document with eventId: {eventId}')
+            else:
+                    print(f'Document with eventId: {eventId} was found, but no changes were made.')
+        else:
+            print(f'No document found with eventId: {eventId}')
         print(f'Processed image with detected emotion: {emotion_text}')
     except Exception as e:
         print(f'Error processing image: {e}')
@@ -54,14 +70,14 @@ def entry_point(request):
     if not image_file:
         return 'No image file found in the request', 400
 
-    timestamp = request.form.get('timestamp')
-    venue = request.form.get('venue')
-    camera_id = request.form.get('camera_id')
-    if not (timestamp and venue and camera_id):
-        return 'Missing timestamp, venue, or camera_id in the request', 400
+    detectionTime = request.form.get('detectionTime')
+    eventId = request.form.get('eventId')
+    cameraId = request.form.get('cameraId')
+    if not (detectionTime and eventId and cameraId):
+        return 'Missing detectionTime, eventId, or cameraId in the request', 400
 
     image_data = image_file.read()
-    process_image(image_data, timestamp, venue, camera_id)
+    process_image(image_data, detectionTime, eventId, cameraId)
     return ('', 204)
 
 
@@ -74,4 +90,5 @@ if __name__ == "__main__":
         return entry_point(request)
 
     app.run(host='0.0.0.0', port= os.environ["PORT"], debug=True)
-    print("Server running on port", os.environ["PORT"])
+    #app.run(host='0.0.0.0', port= 8088, debug=True)
+    print("Server running on port")
