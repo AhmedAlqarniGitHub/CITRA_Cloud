@@ -4,6 +4,8 @@ from keras.models import load_model
 from pymongo import MongoClient
 import os
 from bson import ObjectId
+from datetime import datetime
+from bson.objectid import ObjectId
 
 # MongoDB setup
 mongo_client = MongoClient("mongodb+srv://ahmedalg4321:citra321@cluster0.u2aiu58.mongodb.net/?retryWrites=true&w=majority")
@@ -36,10 +38,15 @@ def process_image(image_data, detectionTime, eventId, cameraId):
         emotion_label_arg = np.argmax(emotion_prediction)
         emotion_text = emotion_dict[emotion_label_arg]
 
+        # Convert detectionTime from string to datetime object
+        if isinstance(detectionTime, str):
+            detectionTime = datetime.fromisoformat(detectionTime)
+
         # Save to MongoDB
         # Emotion data to be added
         emotion_data = {
-            "cameraId": cameraId,
+            "_id" : ObjectId(),
+            "camera": ObjectId(cameraId),
             "detectionTime": detectionTime,
             "detectedEmotion": emotion_text
         }

@@ -40,7 +40,7 @@ Cloud Functionality:
 docker build -t emotion-detection-app .  --platform linux/amd64
 docker run -p 8088:8080 emotion-detection-app
 
-docker tag emotion-detection-app me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:feb272
-docker push me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:feb272
+docker tag emotion-detection-app me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:may2
+docker push me-central1-docker.pkg.dev/mx-project-citra/citra2/emotion-detection-app:may2
 
 --platform linux/amd64
